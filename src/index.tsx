@@ -10,7 +10,7 @@ import {
 import { 
   Upload, FileText, Download, Settings, RefreshCw,
   Target, TrendingUp, Users, DollarSign, Fingerprint, Activity,
-  ChevronRight, BarChart2, Table as TableIcon, CheckCircle, Maximize2
+  ChevronRight, BarChart2, Table as TableIcon, CheckCircle, Maximize2, Minimize2
 } from 'lucide-react';
 
 // --- Type Definitions ---
@@ -95,11 +95,35 @@ const App = () => {
   const [bootB, setBootB] = useState(300);
   const [isBootstrapping, setIsBootstrapping] = useState(false);
   
+  // Fullscreen State
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   // Ref for Chart Capture
   const chartRef = useRef<HTMLDivElement>(null);
 
   // --- State: Filtering ---
   const [activeFilters, setActiveFilters] = useState<{[key: string]: string[]}>({});
+
+  // --- Effect: Fullscreen Listener ---
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(e => {
+        console.error("Fullscreen error:", e);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
 
   // --- 1. File Handling ---
   const handleFileUpload = (f: File) => {
@@ -349,8 +373,6 @@ const App = () => {
     // 1. Template Check
     let useTemplate = false;
     try {
-      // In a bundled app, assets should be in public/ folder to be served at root.
-      // We attempt to check if the file exists.
       const tplCheck = await fetch('Toluna_GG_Template.pptx', { method: 'HEAD' });
       if (tplCheck.ok) {
         console.log("Template file found.");
@@ -524,6 +546,16 @@ const App = () => {
           <p className="text-muted mb-0 small mt-1">Pricing sensitivity & revenue optimization engine</p>
         </div>
         <div className="d-flex gap-2">
+          
+          <button 
+            className="btn btn-outline-secondary d-flex align-items-center gap-2 shadow-sm"
+            onClick={toggleFullscreen}
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          >
+            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            <span className="d-none d-md-inline">{isFullscreen ? "Exit" : "Full Screen"}</span>
+          </button>
+
           {stats && (
             <>
               <button className="btn btn-outline-primary d-flex align-items-center gap-2" onClick={handleDownloadCSV}>
