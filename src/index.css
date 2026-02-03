@@ -1,0 +1,77 @@
+:root {
+  --primary-color: #2563eb;
+  --secondary-color: #64748b;
+  --bg-color: #f3f4f6;
+  --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+body { 
+  background-color: var(--bg-color); 
+  font-family: 'Inter', sans-serif;
+  color: #1e293b;
+}
+.navbar {
+  background: white;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+}
+.card { 
+  border: none; 
+  border-radius: 12px; 
+  box-shadow: var(--card-shadow); 
+  background: white;
+  transition: transform 0.2s;
+  margin-bottom: 24px;
+}
+.card-header {
+  background: white;
+  border-bottom: 1px solid #f1f5f9;
+  font-weight: 600;
+  padding: 1.25rem;
+  border-radius: 12px 12px 0 0 !important;
+}
+.metric-card {
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+}
+.metric-card .icon-bg {
+  position: absolute;
+  right: -10px;
+  bottom: -10px;
+  opacity: 0.1;
+  transform: rotate(-15deg);
+}
+.dropzone {
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f8fafc;
+}
+.dropzone:hover {
+  border-color: var(--primary-color);
+  background: #eff6ff;
+}
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
+}
+.btn-primary {
+  background-color: var(--primary-color);
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+}
+.table-custom th {
+  background-color: #f8fafc;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+/* Chart overrides */
+.recharts-cartesian-grid-horizontal line, .recharts-cartesian-grid-vertical line { 
+  stroke: #e2e8f0; 
+}
