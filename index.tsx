@@ -389,7 +389,7 @@ const App = () => {
     slide = pres.addSlide({ masterName });
     slide.addText("Research Parameters & Methodology", { x: 0.5, y: 0.25, fontSize: 20, bold: true, fontFace: "Calibri", color: '1E293B' });
     
-    const filterTxt = Object.entries(activeFilters).map(([k, v]) => `${k}: ${v.join(', ')}`).join('; ') || "None";
+    const filterTxt = Object.entries(activeFilters).map(([k, v]) => `${k}: ${(v as string[]).join(', ')}`).join('; ') || "None";
     const rangeTxt = showRange 
       ? (rangeMethod === 'pct' ? `Revenue Retention: > ${rangePctRev}% of Max` : "Statistical Confidence Lower Bound")
       : "Analysis focused on peak OPP only.";
@@ -627,7 +627,7 @@ const App = () => {
                         <label className="form-label">Price Columns (Wide)</label>
                         <select multiple className="form-select form-select-sm" size={4}
                            value={widePriceCols}
-                           onChange={e => setWidePriceCols(Array.from(e.target.selectedOptions, o => o.value))}>
+                           onChange={e => setWidePriceCols(Array.from(e.target.selectedOptions, (o: any) => o.value))}>
                            {columns.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                        </div>
@@ -644,7 +644,7 @@ const App = () => {
                   <hr className="my-3 opacity-50"/>
                   <div className="mb-2">
                     <label className="form-label">Segment Filters</label>
-                    <select multiple className="form-select form-select-sm" size={3} value={segCols} onChange={e => setSegCols(Array.from(e.target.selectedOptions, o => o.value))}>
+                    <select multiple className="form-select form-select-sm" size={3} value={segCols} onChange={e => setSegCols(Array.from(e.target.selectedOptions, (o: any) => o.value))}>
                       {columns.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
                   </div>
@@ -739,10 +739,10 @@ const App = () => {
                             <select multiple className="form-select form-select-sm" 
                               value={activeFilters[seg] || []}
                               onChange={e => {
-                                const opts = Array.from(e.target.selectedOptions, o => o.value);
+                                const opts = Array.from(e.target.selectedOptions, (o: any) => o.value);
                                 setActiveFilters(prev => ({...prev, [seg]: opts}));
                               }}>
-                              {uniqueVals.map(v => <option key={v} value={v}>{v}</option>)}
+                              {uniqueVals.map(v => <option key={String(v)} value={String(v)}>{String(v)}</option>)}
                             </select>
                          </div>
                        )
@@ -820,12 +820,12 @@ const App = () => {
                           </defs>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
                           <XAxis dataKey="price" type="number" domain={['dataMin', 'dataMax']} 
-                             tickFormatter={v => `${effectiveCurrency}${v}`} 
-                             label={{ value: `Price (${effectiveCurrency})`, position: 'bottom', offset: 0 }} 
+                             tickFormatter={(v: any) => `${effectiveCurrency}${v}`} 
+                             label={{ value: `Price (${effectiveCurrency})`, position: 'bottom', offset: 0 } as any} 
                              tick={{fill: '#6b7280'}}
                           />
-                          <YAxis yAxisId="left" orientation="left" tickFormatter={v => `${(v * 100).toFixed(0)}%`} label={{ value: 'Demand', angle: -90, position: 'insideLeft' }} tick={{fill: '#3b82f6'}} />
-                          <YAxis yAxisId="right" orientation="right" tickFormatter={v => `${effectiveCurrency}${formatNumber(v * (stats.opt.revenue || 1), 0)}`} label={{ value: 'Revenue', angle: 90, position: 'insideRight' }} tick={{fill: '#10b981'}} />
+                          <YAxis yAxisId="left" orientation="left" tickFormatter={v => `${(v * 100).toFixed(0)}%`} label={{ value: 'Demand', angle: -90, position: 'insideLeft' } as any} tick={{fill: '#3b82f6'}} />
+                          <YAxis yAxisId="right" orientation="right" tickFormatter={v => `${effectiveCurrency}${formatNumber(v * (stats.opt.revenue || 1), 0)}`} label={{ value: 'Revenue', angle: 90, position: 'insideRight' } as any} tick={{fill: '#10b981'}} />
                           
                           <Tooltip 
                             contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
