@@ -88,7 +88,8 @@ const App = () => {
   const [weightCol, setWeightCol] = useState('');
   
   const [showRange, setShowRange] = useState(false);
-  const [rangeMethod, setRangeMethod] = useState<'pct' | 'original'>('pct');
+  // Default changed to 'original' (Statistical) as requested
+  const [rangeMethod, setRangeMethod] = useState<'pct' | 'original'>('original');
   const [rangePctRev, setRangePctRev] = useState(95);
   
   const [useBoot, setUseBoot] = useState(false);
@@ -297,7 +298,7 @@ const App = () => {
         setIsBootstrapping(false);
       }
 
-      // Interpolation
+      // Interpolation (Still used for visualization)
       const pMin = res[0].price;
       const pMax = res[res.length - 1].price;
       const steps = 100;
@@ -333,10 +334,13 @@ const App = () => {
         });
       }
 
-      let opt = interp[0];
-      interp.forEach(r => { if(r.revenue > opt.revenue) opt = r; });
+      // OPP SELECTION LOGIC (UPDATED: Discrete Only)
+      // We look for max revenue in the *Discrete* results (res), not interpolated results.
+      let opt = res[0];
+      res.forEach(r => { if(r.revenue > opt.revenue) opt = r; });
       const maxRev = opt.revenue || 1;
       
+      // Scaling for chart visualization
       interp.forEach(r => r.rev_scaled = r.revenue / maxRev);
       res.forEach(r => (r as InterpolatedRow).rev_scaled = r.revenue / maxRev);
 
@@ -346,7 +350,7 @@ const App = () => {
         if (rangeMethod === 'pct') {
           threshold = maxRev * (rangePctRev / 100);
         } else {
-          // Statistical: Use bootstrapped Lower CI of OPP or 95% fallback
+          // Statistical: Use bootstrapped Lower CI of the DISCRETE OPP or 95% fallback
           if (opt.revenue_lo !== undefined) {
             threshold = opt.revenue_lo;
           } else {
@@ -354,6 +358,7 @@ const App = () => {
           }
         }
         
+        // We still use interpolated prices for range bounds to show the "safe zone" graphically
         const pricesAbove = interp.filter(r => r.revenue >= threshold).map(r => r.price);
         if (pricesAbove.length > 0) {
           range.lo = Math.min(...pricesAbove);
@@ -416,7 +421,7 @@ const App = () => {
       { text: "ANALYTICAL FRAMEWORK", options: { bold: true, fontSize: 11, breakLine: true, color: '334155' } },
       { text: "• Methodology: Gabor-Granger Pricing Model.", options: { fontSize: 11, breakLine: true, color: '334155' } },
       { text: "• Curve Fitting: Continuous Linear Interpolation.", options: { fontSize: 11, breakLine: true, color: '334155' } },
-      { text: "• Objective: Revenue-volume optimization via Optimal Price Point (OPP) analysis.", options: { fontSize: 11, breakLine: true, color: '334155' } },
+      { text: "• Objective: Revenue-volume optimization via Optimal Price Point (OPP) analysis (Discrete selection).", options: { fontSize: 11, breakLine: true, color: '334155' } },
       { text: " ", options: { fontSize: 11, breakLine: true } },
       { text: "SAMPLE CONTEXT", options: { bold: true, fontSize: 11, breakLine: true, color: '334155' } },
       { text: `• Base Size (N): ${stats.baseSize} unique validated respondents.`, options: { fontSize: 11, breakLine: true, color: '334155' } },
@@ -461,8 +466,9 @@ const App = () => {
     slide = pres.addSlide({ masterName });
     slide.addText("Strategic Executive Summary", { x: 0.5, y: 0.25, fontSize: 20, bold: true, fontFace: "Calibri", color: '1E293B' });
     
+    // UPDATED: Use raw price without forcing rounding
     slide.addText("Optimal Price Point (OPP)", { x: 0.5, y: 1.0, w: 4.2, h: 0.4, fontSize: 11, color: "666666", fontFace: "Calibri" });
-    slide.addText(`${effectiveCurrency}${formatNumber(stats.opt.price)}`, { x: 0.5, y: 1.4, w: 4.2, h: 0.8, fontSize: 28, bold: true, color: "2563eb", fontFace: "Calibri" });
+    slide.addText(`${effectiveCurrency}${stats.opt.price}`, { x: 0.5, y: 1.4, w: 4.2, h: 0.8, fontSize: 28, bold: true, color: "2563eb", fontFace: "Calibri" });
     
     slide.addText("Statistically Valid Range", { x: 5.3, y: 1.0, w: 4.2, h: 0.4, fontSize: 11, color: "666666", fontFace: "Calibri" });
     const rangeStr = stats.range.lo !== null 
@@ -476,7 +482,7 @@ const App = () => {
       { text: `• Estimated Revenue Potential: ${effectiveCurrency}${formatNumber(stats.opt.revenue, 2)}`, options: { fontSize: 11, breakLine: true, color: '334155' } },
       { text: " ", options: { fontSize: 11, breakLine: true } },
       { text: "STRATEGIC IMPLICATIONS", options: { bold: true, fontSize: 11, breakLine: true, color: '334155' } },
-      { text: `• Pricing Core: Data identifies ${effectiveCurrency}${formatNumber(stats.opt.price)} as the peak revenue efficiency point.`, options: { fontSize: 11, breakLine: true, color: '334155' } },
+      { text: `• Pricing Core: Data identifies ${effectiveCurrency}${stats.opt.price} as the peak revenue efficiency point.`, options: { fontSize: 11, breakLine: true, color: '334155' } },
       { text: `• Market Tolerance: ${showRange ? `Stability observed within ${rangeStr}.` : "Range analysis not requested."}`, options: { fontSize: 11, breakLine: true, color: '334155' } },
       { text: "• Guidance: Align commercial strategy with the OPP to maximize top-line yield.", options: { fontSize: 11, breakLine: true, color: '334155' } }
     ];
@@ -495,7 +501,7 @@ const App = () => {
     }));
     
     const tableRows = stats.res.map(r => [
-      r.price.toFixed(2),
+      r.price, // Raw price, no formatting
       r.n_rows,
       formatNumber(r.demand * 100) + "%",
       r.demand_lo !== undefined ? formatNumber(r.demand_lo * 100) + "%" : "-",
@@ -780,7 +786,8 @@ const App = () => {
                     <div className="card metric-card text-white h-100" style={{ backgroundColor: '#007bff' }}>
                       <Target className="icon-bg" size={60} />
                       <div className="small opacity-75 fw-bold text-uppercase tracking-wider">OPP Price</div>
-                      <div className="h3 fw-bold mt-2 mb-0">{effectiveCurrency}{formatNumber(stats.opt.price)}</div>
+                      {/* UPDATED: Raw price display */}
+                      <div className="h3 fw-bold mt-2 mb-0">{effectiveCurrency}{stats.opt.price}</div>
                     </div>
                   </div>
                   <div className="col">
@@ -935,6 +942,7 @@ const App = () => {
                      <tbody>
                        {stats.res.map((r, i) => (
                          <tr key={i}>
+                           {/* UPDATED: Raw price display */}
                            <td className="fw-bold">{effectiveCurrency}{r.price}</td>
                            <td>{r.n_rows}</td>
                            <td>{formatNumber(r.demand * 100, 1)}%</td>
@@ -979,34 +987,21 @@ const App = () => {
         </div>
       </div>
       
-{/* Moved to Top-Right to avoid SharePoint Iframe clipping at the bottom */}
-      <div 
-        className="position-fixed" 
-        style={{ 
-          top: '20px', 
-          right: '20px', 
-          zIndex: 99999, 
-          pointerEvents: 'auto'
-        }}
-      >
+      {/* Fixed Full Screen FAB - Bottom Right */}
+      <div className="position-fixed bottom-0 end-0 p-4" style={{ zIndex: 99999 }}>
         <button 
-          className="btn btn-primary rounded-pill shadow-lg d-flex align-items-center gap-2 px-3"
-          style={{ 
-            height: '45px',
-            border: '2px solid white',
-            fontWeight: 'bold'
-          }}
+          className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+          style={{ width: '64px', height: '64px', border: '2px solid rgba(255,255,255,0.5)' }}
           onClick={toggleFullscreen}
+          title={isFullscreen ? "Exit Full Screen" : "Enter Full Screen"}
         >
-          {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-          {isFullscreen ? "Exit" : "Full Screen"}
+          {isFullscreen ? <Minimize2 size={28} /> : <Maximize2 size={28} />}
         </button>
       </div>
+
     </div>
   );
 };
 
 const root = createRoot(document.getElementById('root')!);
 root.render(<App />);
-
-
