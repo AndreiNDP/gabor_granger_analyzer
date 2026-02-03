@@ -979,11 +979,23 @@ const App = () => {
         </div>
       </div>
       
-      {/* Fixed Full Screen FAB - Bottom Right */}
-      <div className="position-fixed bottom-0 end-0 p-4" style={{ zIndex: 1050 }}>
+{/* Fixed Full Screen FAB - High Z-Index for SharePoint */}
+      <div 
+        className="position-fixed" 
+        style={{ 
+          bottom: '30px', 
+          right: '30px', 
+          zIndex: 9999, // Boosted to stay above SharePoint layers
+          pointerEvents: 'auto'
+        }}
+      >
         <button 
           className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center"
-          style={{ width: '64px', height: '64px', border: '2px solid rgba(255,255,255,0.5)' }}
+          style={{ 
+            width: '60px', 
+            height: '60px', 
+            border: '2px solid rgba(255,255,255,0.3)' 
+          }}
           onClick={toggleFullscreen}
           title={isFullscreen ? "Exit Full Screen" : "Enter Full Screen"}
         >
@@ -997,3 +1009,4 @@ const App = () => {
 
 const root = createRoot(document.getElementById('root')!);
 root.render(<App />);
+
