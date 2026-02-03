@@ -979,34 +979,34 @@ const App = () => {
         </div>
       </div>
       
-{/* Fixed Full Screen FAB - High Z-Index for SharePoint */}
+{/* Moved to Top-Right to avoid SharePoint Iframe clipping at the bottom */}
       <div 
         className="position-fixed" 
         style={{ 
-          bottom: '30px', 
-          right: '30px', 
-          zIndex: 9999, // Boosted to stay above SharePoint layers
+          top: '20px', 
+          right: '20px', 
+          zIndex: 99999, 
           pointerEvents: 'auto'
         }}
       >
         <button 
-          className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+          className="btn btn-primary rounded-pill shadow-lg d-flex align-items-center gap-2 px-3"
           style={{ 
-            width: '60px', 
-            height: '60px', 
-            border: '2px solid rgba(255,255,255,0.3)' 
+            height: '45px',
+            border: '2px solid white',
+            fontWeight: 'bold'
           }}
           onClick={toggleFullscreen}
-          title={isFullscreen ? "Exit Full Screen" : "Enter Full Screen"}
         >
-          {isFullscreen ? <Minimize2 size={28} /> : <Maximize2 size={28} />}
+          {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+          {isFullscreen ? "Exit" : "Full Screen"}
         </button>
       </div>
-
     </div>
   );
 };
 
 const root = createRoot(document.getElementById('root')!);
 root.render(<App />);
+
 
