@@ -114,9 +114,12 @@ const App = () => {
   }, []);
 
   const toggleFullscreen = () => {
+    const element = chartRef.current || document.documentElement; // Target specific ref first
+
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(e => {
-        console.error("Fullscreen error:", e);
+      element.requestFullscreen().catch(e => {
+        // This will log if SharePoint is blocking the request
+        console.error("Fullscreen blocked. Check iframe 'allow' permissions.", e);
       });
     } else {
       if (document.exitFullscreen) {
@@ -548,15 +551,6 @@ const App = () => {
         </div>
         <div className="d-flex gap-2">
           
-          <button 
-            className="btn btn-outline-secondary d-flex align-items-center gap-2 shadow-sm"
-            onClick={toggleFullscreen}
-            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-          >
-            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-            <span className="d-none d-md-inline">{isFullscreen ? "Exit" : "Full Screen"}</span>
-          </button>
-
           {stats && (
             <>
               <button className="btn btn-outline-primary d-flex align-items-center gap-2" onClick={handleDownloadCSV}>
@@ -984,6 +978,19 @@ const App = () => {
 
         </div>
       </div>
+      
+      {/* Fixed Full Screen FAB - Bottom Right */}
+      <div className="position-fixed bottom-0 end-0 p-4" style={{ zIndex: 1050 }}>
+        <button 
+          className="btn btn-dark rounded-circle shadow-lg d-flex align-items-center justify-content-center"
+          style={{ width: '64px', height: '64px', border: '2px solid rgba(255,255,255,0.5)' }}
+          onClick={toggleFullscreen}
+          title={isFullscreen ? "Exit Full Screen" : "Enter Full Screen"}
+        >
+          {isFullscreen ? <Minimize2 size={28} /> : <Maximize2 size={28} />}
+        </button>
+      </div>
+
     </div>
   );
 };
